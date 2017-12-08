@@ -13,14 +13,15 @@ namespace EPPlus.Html.Test
     class Program
     {
         private static string CurrentLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-        private static FileInfo Test001 = new FileInfo(CurrentLocation + "\\Resources\\Test001.xlsx");
+        
 
         static void Main(string[] args)
         {
-            var package = new ExcelPackage(new FileInfo(CurrentLocation + "/Resources/Test001.xlsx"));
+            FileInfo testFile = new FileInfo(CurrentLocation + "/Resources/Test002.xlsx");
+            var package = new ExcelPackage(testFile);
             var worksheet = package.Workbook.Worksheets[1];
 
-            string html = worksheet.ToHtml();
+            string html = worksheet.ToHtml(ConversionFlags.AutoWidths);
 
             Show(html);
         }

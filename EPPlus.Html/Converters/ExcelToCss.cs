@@ -1,4 +1,6 @@
-﻿using EPPlus.Html.Html;
+﻿using System.Globalization;
+using OfficeOpenXml.FormulaParsing.Utilities;
+using EPPlus.Html.Html;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
@@ -11,18 +13,18 @@ namespace EPPlus.Html.Converters
 {
     internal static class ExcelToCss
     {
-        internal static CssDeclaration ToCss(this ExcelRow excelRow)
+        internal static CssDeclaration ToCss(this ExcelRow excelRow, ConversionFlags flags = ConversionFlags.None)
         {
             var css = new CssDeclaration();
 
-            css["height"] = excelRow.Height + "px";
+            css["height"] = (!flags.HasFlag(ConversionFlags.ExactPixelHeights)? ((int)Math.Round(excelRow.Height,0)).ToString() : excelRow.Height.ToString(CultureInfo.CurrentCulture)) + "px";
 
             css.Update(excelRow.Style.ToCss());
 
             return css;
         }
 
-        internal static CssDeclaration ToCss(this ExcelRange excelRange)
+        internal static CssDeclaration ToCss(this ExcelRange excelRange, ConversionFlags flags = ConversionFlags.None)
         {
             var css = new CssDeclaration();
             if (excelRange.Columns == 1 && excelRange.Rows == 1)
@@ -54,7 +56,19 @@ namespace EPPlus.Html.Converters
             {
                 css["font-weight"] = "bold";
             }
-
+            if (excelFont.Italic)
+            {
+                css["font-style"] = "italic";
+            }
+            else if (excelFont.UnderLine)
+            {
+                css["font-style"] = "underline";
+            }
+            else if (excelFont.UnderLine)
+            {
+                css["text-decoration"] = "underline";
+            }
+            
             css["font-family"] = excelFont.Name;
             css["font-size"] = excelFont.Size + "pt";
 
