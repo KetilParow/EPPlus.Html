@@ -7,8 +7,12 @@ namespace EPPlus.Html
 {
     public static class EPPlusExtensions
     {
-        public static string ToHtml(this ExcelWorksheet sheet, ConversionFlags flags = ConversionFlags.None)
+        public static string ToHtml(this ExcelWorksheet sheet, ConversionFlags flags = ConversionFlags.Default)
         {
+            if (flags.HasFlag(ConversionFlags.NoCss))
+            {
+                flags = flags | ConversionFlags.AutoWidths | ConversionFlags.AutoHeights;
+            }
             int lastRow = sheet.Dimension.Rows;
             int lastCol = sheet.Dimension.Columns;
 
@@ -20,8 +24,6 @@ namespace EPPlus.Html
             for (int row = 1; row <= lastRow; row++)
             {
                 ExcelRow excelRow = sheet.Row(row);
-
-                var test = excelRow.Style;
                 HtmlElement htmlRow = htmlTable.AddChild("tr");
                 htmlRow.Styles.Update(excelRow.ToCss(flags));
                 int col = 1;
@@ -60,11 +62,13 @@ namespace EPPlus.Html
     [Flags]
     public enum ConversionFlags
     {
-        None = 0,
+        Default = 0,
         AutoWidths = 1,
-        RightAlignNumerals = 2,
-        IgnoreColSpans = 4,
-        ExactPixelHeights = 8
+        AutoHeights = 2,
+        RightAlignNumerals = 4,
+        IgnoreColSpans = 8,
+        ExactPixelHeights = 16,
+        NoCss = 32
     }
 
 }

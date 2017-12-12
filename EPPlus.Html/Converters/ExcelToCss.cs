@@ -1,40 +1,45 @@
 ﻿using System.Globalization;
-using OfficeOpenXml.FormulaParsing.Utilities;
 using EPPlus.Html.Html;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EPPlus.Html.Converters
 {
     internal static class ExcelToCss
     {
-        internal static CssDeclaration ToCss(this ExcelRow excelRow, ConversionFlags flags = ConversionFlags.None)
+        internal static CssDeclaration ToCss(this ExcelRow excelRow, ConversionFlags flags = ConversionFlags.Default)
         {
             var css = new CssDeclaration();
-
-            css["height"] = (!flags.HasFlag(ConversionFlags.ExactPixelHeights)? ((int)Math.Round(excelRow.Height,0)).ToString() : excelRow.Height.ToString(CultureInfo.CurrentCulture)) + "px";
-
+            if (flags.HasFlag(ConversionFlags.NoCss))
+            {
+                return css;
+            }
+            //Make sure we don't return comma as decimal separator. Not supported in HTML.
+            if (!flags.HasFlag(ConversionFlags.AutoHeights))
+            {
+                css["height"] = (!flags.HasFlag(ConversionFlags.ExactPixelHeights) ? ((int)Math.Round(excelRow.Height, 0)).ToString() : excelRow.Height.ToString(CultureInfo.GetCultureInfo("en-US"))) + "px";
+            }
+            
             css.Update(excelRow.Style.ToCss());
-
             return css;
         }
 
-        internal static CssDeclaration ToCss(this ExcelRange excelRange, ConversionFlags flags = ConversionFlags.None)
+        internal static CssDeclaration ToCss(this ExcelRange excelRange, ConversionFlags flags = ConversionFlags.Default)
         {
             var css = new CssDeclaration();
-            if (excelRange.Columns == 1 && excelRange.Rows == 1)
+            if (flags.HasFlag(ConversionFlags.NoCss))
+            {
+                return css;
+            }
+            if (!flags.HasFlag(ConversionFlags.AutoWidths) && excelRange.Columns == 1 && excelRange.Rows == 1)
             {
                 var excelColumn = excelRange.Worksheet.Column(excelRange.Start.Column);
-
-                css["max-width"] = excelColumn.Width + "em";
-                css["width"] = excelColumn.Width + "em";
-                css.Update(excelRange.Style.ToCss());
+                //Make sure we don't return comma as decimal separator. Not supported in HTML.
+                css["max-width"] = excelColumn.Width.ToString(CultureInfo.GetCultureInfo("en-US")) + "em";
+                css["width"] = excelColumn.Width.ToString(CultureInfo.GetCultureInfo("en-US")) + "em";
             }
+            css.Update(excelRange.Style.ToCss());
             return css;
         }      
 
