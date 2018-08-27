@@ -1,7 +1,12 @@
 ﻿using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
+using System;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace EPPlus.Html.Test
 {
@@ -12,13 +17,70 @@ namespace EPPlus.Html.Test
 
         static void Main(string[] args)
         {
-            FileInfo testFile = new FileInfo(CurrentLocation + "/Resources/Test003.xlsx");
-            var package = new ExcelPackage(testFile);
+            //FileInfo testFile = new FileInfo(CurrentLocation + "/Resources/Test003.xlsx");            
+            //ExcelWorksheet worksheet = GetEmptytestTemplateAndGenerateSomeContent();
+
+            ExcelWorksheet worksheet = GetExampleSheet();
+            //var base64String = ExtractImage(worksheet);
+            string html = worksheet.ToHtml(ConversionFlags.AutoWidths | ConversionFlags.AggregateStyleSheet);
+            Show(html);
+        }
+
+        private static ExcelWorksheet GetExampleSheet()
+        {
+            return GetExcelResource("Fakturajournal.xlsx").Workbook.Worksheets[1];
+        }
+
+        private static ExcelWorksheet GetEmptytestTemplateAndGenerateSomeContent()
+        {
+            ExcelPackage package = GetExcelResource("debank.xltx");
             var worksheet = package.Workbook.Worksheets[1];
 
-            string html = worksheet.ToHtml(ConversionFlags.AutoWidths);
+            worksheet.SetValue("A1", "Headeren");
 
-            Show(html);
+            for (var i = 1; i < 6; i++)
+            {
+                worksheet.SetValue(3, i, $"Kolonne {i}");
+            }
+            var rnd = new Random(DateTime.Now.Millisecond);
+            for (var r = 4; r < 14; r++)
+            {
+                for (var i = 1; i < 6; i++)
+                {
+                    worksheet.SetValue(r, i, rnd.NextDouble());
+                }
+            }
+
+            return worksheet;
+        }
+
+        private static string ExtractImage(ExcelWorksheet worksheet)
+        {
+            string base64String;
+            using (var stream = new MemoryStream())
+            {
+                using (var drawing = (ExcelPicture)worksheet.Drawings[0])
+                {
+                    //ImageCodecInfo pngEncoder = ImageCodecInfo.GetImageDecoders().First(c => c.FormatID == ImageFormat.Png.Guid);
+                    //drawing.Image.Save(stream, pngEncoder, null);
+
+                    drawing.Image.Save(stream, ImageFormat.Png);
+                    byte[] imageBytes = stream.ToArray();
+                    base64String = Convert.ToBase64String(imageBytes);
+                }
+            }
+            return base64String;
+        }
+
+        private static ExcelPackage GetExcelResource(string resourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            ExcelPackage package = null;
+            using (Stream stream = assembly.GetManifestResourceStream($"EPPlus.Html.Test.Resources.{resourceName}"))
+            {
+                package = new ExcelPackage(stream);
+            }
+            return package;
         }
 
         static void Show(string html)

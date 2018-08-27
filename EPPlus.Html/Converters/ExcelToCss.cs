@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using EPPlus.Html.Html;
+using EPPlus.Html;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;

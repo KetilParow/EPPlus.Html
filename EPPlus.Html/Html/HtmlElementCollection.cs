@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EPPlus.Html.Html
 {
-    public class HtmlElementCollection : List<HtmlElement>, RenderElement
+    public class HtmlElementCollection : List<HtmlElement>, IRenderElement
     {
         public void Render(StringBuilder html)
         {

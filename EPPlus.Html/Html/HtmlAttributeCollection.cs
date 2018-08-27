@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EPPlus.Html.Html
 {
-    public class HtmlAttributeCollection : Dictionary<string, object>, RenderElement
+    public class HtmlAttributeCollection : Dictionary<string, object>, IRenderElement
     {
         public void Render(StringBuilder html)
         {

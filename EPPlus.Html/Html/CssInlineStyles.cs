@@ -6,18 +6,19 @@ using System.Threading.Tasks;
 
 namespace EPPlus.Html.Html
 {
-    public class CssInlineStyles : CssDeclaration, RenderElement
+    public class CssInlineStyles : CssDeclaration, IRenderElement
     {
         public void Render(StringBuilder html)
         {
             html.Append("style=\"");
-            html.Append
-            (
-                string.Join("", this
-                    .Where(x => x.Value != null)
-                    .Select(x => x.Key + ":" + x.Value + ";"))
-            );
+            html.Append(ToString());
             html.Append('\"');
+        }
+        public override string ToString()
+        {
+            return string.Join("", this
+                    .Where(x => x.Value != null)
+                    .Select(x => x.Key + ":" + x.Value + ";"));
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EPPlus.Html.Html
 {
-    internal interface RenderElement
+    internal interface IRenderElement
     {
         void Render(StringBuilder html);
     }
