@@ -1,12 +1,11 @@
-﻿using OfficeOpenXml;
+﻿using EPPlus.Html.Converters;
+using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using System;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace EPPlus.Html.Test
 {
@@ -28,7 +27,9 @@ namespace EPPlus.Html.Test
 
         private static ExcelWorksheet GetExampleSheet()
         {
-            return GetExcelResource("Fakturajournal.xlsx").Workbook.Worksheets[1];
+
+            ExcelWorkbook workbook = GetExcelResource("Avregning kundekonto.xlsx").Workbook;
+            return workbook.Worksheets[1];
         }
 
         private static ExcelWorksheet GetEmptytestTemplateAndGenerateSomeContent()

@@ -63,7 +63,7 @@ namespace EPPlus.Html
                     htmlCell.Content = excelCell.Text;
 
                     CssDeclaration cssDeclarations = excelCell.ToCss(flags);
-                    CheckForAndAddBackgroundImages(row, ec, htmlCell, sheet, cssDeclarations);
+                    CheckForAndAddBackgroundImages(row, ec, sheet, cssDeclarations);
                     htmlCell.Styles.Update(cssDeclarations);
 
                     HashStyles(inlineStylesBuilder, addedStyleForElements, htmlCell);
@@ -84,13 +84,15 @@ namespace EPPlus.Html
                 return col;
             }
             int spansTo = col;
-            while (sheet.Cells[row, 1, row, spansTo + 1].Merge)
+            while (sheet.Cells[row, col, row, spansTo].Merge)
             {
                 spansTo++;
             }
-            col = spansTo;
-            htmlCell.Attributes.Add("colspan", spansTo);            
-            return col;
+            
+            htmlCell.Attributes.Add("colspan", spansTo - col);
+            
+            //Should now be "next" column.
+            return spansTo - 1;
         }
 
         private static void SubstituteInlineStyles(StringBuilder inlineStylesBuilder, HtmlElement styleelement, Dictionary<string, List<HtmlElement>> addedStyleForElements)
@@ -124,7 +126,7 @@ namespace EPPlus.Html
             addedStyleForCells[htmlCell.Styles.ToString()].Add(htmlCell);
         }
 
-        private static void CheckForAndAddBackgroundImages(int row, int col, HtmlElement htmlCell, ExcelWorksheet sheet, CssDeclaration cssDeclarations)
+        private static void CheckForAndAddBackgroundImages(int row, int col, ExcelWorksheet sheet, CssDeclaration cssDeclarations)
         {
             foreach(var picture in sheet.AllDrawings())
             {
@@ -134,6 +136,7 @@ namespace EPPlus.Html
                 cssDeclarations["background-repeat"] = "no-repeat";
                 cssDeclarations["background-size"] = "contain";
                 cssDeclarations["background-origin"] = "content-box";
+                cssDeclarations["background-position-y"] = "center";
             }
         }
 
